@@ -3,6 +3,10 @@ let noteText;
 let saveNoteBtn;
 let newNoteBtn;
 let noteList;
+const FileIO = require("./fileIO");
+const fileIO = new FileIO();
+
+fileIO.append("db.json", "");
 
 if (window.location.pathname === '/notes') {
   noteTitle = document.querySelector('.note-title');
