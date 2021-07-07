@@ -1,57 +1,72 @@
-//`GET /api/notes` 
-
-// `POST /api/notes` 
-
-// LOAD DATA
-// We are linking our routes to a series of "data" sources.
-// These data sources hold arrays of information on table-data, waitinglist, etc.
-
-const tableData = require('../Develop/db.json');
+// Dependencies
+const fs = require("fs");
 
 
 // ROUTING
+module.exports = function (app) {
 
-module.exports = (app) => {
-  // API GET Requests
-  // Below code handles when users "visit" a page.
-  // In each of the below cases when a user visits a link
-  // (ex: localhost:PORT/api/admin... they are shown a JSON of the data in the table)
-  // ---------------------------------------------------------------------------
+    // API GET Request
+    app.get("/api/notes", (req, res) => {
+        
+        console.log("\n\nExecuting GET notes request");
 
-  app.get('/api/notes', (req, res) => res.json(tableData));
+        // Read 'db.json' file 
+        let data = JSON.parse(fs.readFileSync("../db/db.json", "utf8"));
+        
+        console.log("\nGET request - Returning notes data: " + JSON.stringify(data));
+        
+        // Send read data to response of 'GET' request
+        response.json(data);
+    });
 
 
+    // API POST Request
+    app.post("/api/notes", (req, res) => {
 
-  // API POST Requests
-  // Below code handles when a user submits a form and thus submits data to the server.
-  // In each of the below cases, when a user submits form data (a JSON object)
-  // ...the JSON is pushed to the appropriate JavaScript array
-  // (ex. User fills out a reservation request... this data is then sent to the server...
-  // Then the server saves the data to the tableData array)
-  // ---------------------------------------------------------------------------
+        // Extracted new note from request body.  
+        const newNote = req.body;
+        
+        console.log("\n\nPOST request - New Note : " + JSON.stringify(newNote));
 
-  app.post('/api/notes', (req, res) => {
-    // Note the code here. Our "server" will respond to requests and let users know if they have a table or not.
-    // It will do this by sending out the value "true" have a table
-    // req.body is available since we're using the body parsing middleware
-    console.log(req.body)
-    /*if (tableData.length < 5) {
-      tableData.push(req.body);
-      res.json(true);
-    } else {
-      waitListData.push(req.body);
-      res.json(false);
-    }*/
-  });
+        // Assigned unique id obtained from 'uuid' package
+        newNote.id = uuidv4();
 
-  // I added this below code so you could clear out the table while working with the functionality.
-  // Don"t worry about it!
+        // Read data from 'db.json' file
+        let data = JSON.parse(fs.readFileSync("../db/db.json", "utf8"));
+    
+        // Pushed new note in notes file 'db.json'
+        data.push(newNote);
 
-  app.post('/api/clear', (req, res) => {
-    // Empty out the arrays of data
-    tableData.length = 0;
-    waitListData.length = 0;
+        // Written notes data to 'db.json' file
+        fs.writeFileSync('./db/db.json', JSON.stringify(data));
+        
+        console.log("\nSuccessfully added new note to 'db.json' file!");
 
-    res.json({ ok: true });
-  });
+        // Send response
+        res.json(data);
+    });
+
+
+    // API DELETE request
+    app.delete("/api/notes/:id", (req, response) => {
+
+        // Fetched id to delete
+        let noteId = req.params.id.toString();
+        
+        console.log(`\n\nDELETE note request for noteId: ${noteId}`);
+
+        // Read data from 'db.json' file
+        let data = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
+
+        // filter data to get notes except the one to delete
+        const newData = data.filter( note => note.id.toString() !== noteId );
+
+        // Write new data to 'db.json' file
+        fs.writeFileSync('./db/db.json', JSON.stringify(newData));
+        
+        console.log(`\nSuccessfully deleted note with id : ${noteId}`);
+
+        // Send response
+        res.json(newData);
+    });
 };
