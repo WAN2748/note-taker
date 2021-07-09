@@ -13,3 +13,6 @@ with the help of Olivia (T.A.) and my tutor I was able to have proper file struc
 
 ## screenshots 
 
+![note home page](notehomeSS.png)
+
+![note page](notepage.png)
